@@ -1,1 +1,2 @@
-
+Muj kod nepouživá žádne bibblioteky. Je v něm realizováno 6 operací s maticemi: S (sčítání), N (násobení zprava), I (inverze), T (transponace), R (horní trojúhelníkový tvar) a D (diagonální tvar). V prvních dvou případech hned na řádcích po písmenu musí být uvedeni rozměr a matice po řádcích, kterou musíme vynásobit zprava nebo kterou musíme přičíst. Zadávání vstupu se skončí, když místo písmena operace v novém řádku bude slovo “End”.
+Výstupem je stav matice po každé z operací. V případě, že z nějakého důvodu vstup není vhodný pro operaci, místo matice se vypíše slovo “Error”.
