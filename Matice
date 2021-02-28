@@ -1,0 +1,259 @@
+def minor(A, i, j):
+    M = A
+    del M[i]
+    for i in range(len(A[0]) - 1):  # Odstranění matice pro uvolnění paměti
+        del M[i][j]
+    return M
+
+
+def det(A):  # funkce pro výpočet determinantu
+    m = len(A)  # rozměry matice
+    n = len(A[0])
+    if m != n:
+        return None  # Pokud rozměry nejsou stejné, vratíme chybu
+    if n == 1:
+        return A[0][0]  # Pokud je matice jednotková, vratíme prvek
+    signum = 1
+    determinant = 0
+
+    for j in range(n):
+        determinant += A[0][j] * signum * det(minor(A, 0, j))  # Vypočítáme determinant
+        signum *= -1
+    return determinant  # Vratíme
+
+
+def inverse(A):  # Funkce pro inverzi matice
+    result = []
+    for i in range(len(A)):
+        result.append([])
+        for z in range(len(A[i])):
+            result[i].append(0)
+    for i in range(len(A)):
+        for j in range(len(A[0])):
+            tmp = minor(A, i, j)  # Změníme výsledek a vratíme se z funkce
+            if i + j % 2 == 1:
+                result[i][j] = -1 * det(tmp) / det(A)
+            else:
+                result[i][j] = 1 * det(tmp) / det(A)
+    return result
+
+
+def transpose(array):  # Funkce transpozice matice
+    res = []  # Matice odpovědi
+    n = len(array)
+    m = len(array[0])
+    for j in range(m):
+        tmp = []
+        for i in range(n):
+            tmp = tmp + [array[i][j]]  # Vytváření dalšího pole pro zápis do odpovědi
+        res = res + [tmp]  # Změna matice odpovědi
+    return res
+
+
+def to_triag(array):
+    a = len(array)
+    b = len(array[0])
+
+    if a != b:
+        print('Error')
+    else:
+        new_elems = array  # Vytvoříme pole odpovědi
+        i = 0
+        while i < a - 1:  # Projdeme a naplníme prvky
+            j = i + 1
+            while j < a:
+                koef = new_elems[j][i] / new_elems[i][i]
+                k = 0
+                while k < a:
+                    new_elems[j][k] -= new_elems[i][k] * koef
+                    k += 1
+                j += 1
+            i += 1
+        return new_elems
+
+
+def invert_matrix(AM, IM):  # Funkce inverze matice
+    for fd in range(len(AM)):
+        fdScaler = 1.0 / AM[fd][fd]
+        for j in range(len(AM)):  # přepočet čísel
+            AM[fd][j] *= fdScaler
+            IM[fd][j] *= fdScaler
+        for i in list(range(len(AM)))[0:fd] + list(range(len(AM)))[fd + 1:]:  #
+            crScaler = AM[i][fd]
+            for j in range(len(AM)):  # Vytvoření výsledku
+                AM[i][j] = AM[i][j] - crScaler * AM[fd][j]
+                IM[i][j] = IM[i][j] - crScaler * IM[fd][j]
+    return IM  # Vrácení výsledku
+
+
+def matrixmult(A, B):  # Funkce násobení matic
+    rows_A = len(A)  # Načítání parametrů matice
+    cols_A = len(A[0])
+    rows_B = len(B)
+    cols_B = len(B[0])
+
+    if cols_A != rows_B:  # zpracování chyb
+        print("Error")
+        return
+
+    C = [[0 for row in range(cols_B)] for col in range(rows_A)]  # Vytvoření nové matice
+
+    for i in range(rows_A):
+        for j in range(cols_B):
+            for k in range(cols_A):
+                C[i][j] += A[i][k] * B[k][j]  # Generování matice
+    for i in C:  # Odpovědět na výstup
+        for z in i:
+            print(z, end=' ')
+        print()
+
+
+f = open('input.txt', 'r')  # Otevření souboru
+
+A = f.readline().split('x')  # Zadání parametrů původní matice
+
+A[1] = A[1][:-1]
+
+a = int(A[0])  # První parametr
+b = int(A[1])  # Druhý parametr
+
+matr = [[] for i in range(b)]  # Puvodni matice
+
+isss = 0  # Proměnná pro zpracování chyby
+
+for i in range(a):  # Maticový vstup
+    matr[i] = [int(t) for t in f.readline().split()]
+    if len(matr[i]) != b:  # Pokud dojde k chybě, zapišeme do proměnné
+        isss = 1
+
+matr.reverse()
+
+while len(matr[0]) == 0:
+    matr = matr[1:]
+
+if isss:  # Pokud dojde k chybě, konec
+    print('Error')
+    exit(0)
+
+s = ''  # Řetězec pro čtení symbolu operací
+
+while True:
+    print()
+    s = str(f.readline())  # Zadání dalšího symbolu
+    s = s[:-1]
+    if s == 'En':  # Pokud je konec - opustíme cyklus
+        exit(0)
+    if s == 'S':  # Pokud součet - přečteme 2. matice
+
+        B = f.readline().split('x')  # Nová matice
+
+        B[1] = B[1][:-1]
+
+        a1 = int(B[0])  # První parametr
+        b1 = int(B[1])  # Druhý parametr
+
+        matr1 = [[] for i in range(b1)]  # Nová matice
+
+        iss = 0
+
+        for i in range(a1):  # Čtení matice
+            matr1[i] = [int(t) for t in f.readline().split()]
+            if len(matr1[i]) != b1:
+                iss = 1
+        matr1.reverse()
+
+        if iss or (a1 > a or b1 > b):  # Pokud dojde k chybě, operací přeskočíme
+            print('Error')
+            continue
+
+        for i in range(a1):  # Přičteme k 1. matici 2.
+            for z in range(b1):
+                matr[i][z] += matr1[i][z]
+
+        for i in matr:  # Zobrazování matic
+            for z in i:
+                print(z, end=' ')
+            print()
+
+    if s == 'I':  # Inverze
+        invert_matrix(matr, matr)  # Volání funkce
+
+        for i in matr:  # Odpověd
+            for z in i:
+                print(int(z * 100) / 100, end=' ')
+            print()
+
+    if s == 'N':  # Násobení matice
+
+        B = f.readline().split('x')  # Přečteme matici
+
+        B[1] = B[1][:-1]
+
+        a1 = int(B[0])  # První parametr
+        b1 = int(B[1])  # Druhý parametr
+
+        matr1 = [[] for i in range(b1)]  # Nová matice
+
+        iss = 0
+
+        for i in range(a1):  # Čtení matice
+            matr1[i] = [int(t) for t in f.readline().split()]
+            if len(matr1[i]) != b1:
+                iss = 1
+        matr1.reverse()
+
+        if iss:  # Pokud dojde k chybě, operací přeskočte.
+            print('Error')
+            continue
+        matrixmult(matr, matr1)
+
+    if s == 'T':  # Transponování matice
+        matr1 = inverse(transpose(matr))  # Zpracování matice
+
+        for i in matr1:  # výsledek
+            for z in i:
+                print(z, end=' ')
+            print()
+
+    if s == 'D':  # Diagonální matice
+        if a == b:
+            matr1 = matr  # Vytvořme matici odpovědí
+            i = 0
+            while i < a - 1:  # Naplnění matice
+                j = i + 1
+                while j < a:
+                    k = 0
+                    kf = matr1[j][i] / matr1[i][i]
+                    while k < a:
+                        matr1[j][k] -= matr1[i][k] * kf
+                        k += 1
+                    j += 1
+                i += 1
+            matr = matr1
+        else:
+            matr1 = matr #  Vytvořme matici odpovědí
+            i = 0
+            while i < a - 1:  # Naplnění matice
+                j = i + 1
+                while j < a:
+                    k = 0
+                    kf = matr1[j][i] / matr1[i][i]
+                    while k < a:
+                        matr1[j][k] -= matr1[i][k] * kf
+                        k += 1
+                    j += 1
+                i += 1
+            matr = matr1
+
+        for i in range(a):  # Výsledek
+            for z in range(b):
+                print(matr[i][z], end=' ')
+            print()
+
+    if s == 'R':  # Horní trojuhelníková
+        matr = to_triag(matr)  # Funkce
+
+        for i in matr:  # výsledek
+            for z in i:
+                print(z, end=' ')
+            print()
